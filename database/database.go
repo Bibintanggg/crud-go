@@ -12,10 +12,10 @@ import (
 
 var DB *gorm.DB
 
-func ConnectDB() error {
+func ConnectDB() (*gorm.DB, error) {
 	err := godotenv.Load()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	dbHost := os.Getenv("DB_HOST")
@@ -29,22 +29,17 @@ func ConnectDB() error {
 		dbHost, dbUsername, dbPassword, dbName, dbPort,
 	)
 
-	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
-
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	err = DB.AutoMigrate(
-		&model.Book{},
-	)
-
+	err = db.AutoMigrate(&model.Book{})
 	if err != nil {
-		panic("Can't connect to Model!")
+		return nil, err
 	}
 
-	fmt.Println("Succesfully connect to db")
+	fmt.Println("Successfully connect to db")
 
-	return nil
-
+	return db, nil
 }

@@ -2,22 +2,20 @@ package main
 
 import (
 	"crud_go/database"
+	"crud_go/internal/router"
 	"log"
-
-	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	err := database.ConnectDB()
-
+	db, err := database.ConnectDB()
 	if err != nil {
-		log.Fatal("Can't connect to the database server")
+		log.Fatal("Database connection error:", err)
 	}
 
-	r := gin.Default()
+	r := router.SetupRoute(db)
 
-	r.LoadHTMLGlob("templates/*")
-	r.Static("/public", "./public")
-
-	r.Run(":8080")
+	log.Println("🚀 Server running on http://localhost:8080")
+	if err := r.Run(":8080"); err != nil {
+		log.Fatal("Server error:", err)
+	}
 }
